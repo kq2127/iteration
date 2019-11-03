@@ -1,0 +1,209 @@
+---
+title: "Writting Functions"
+author: "Kristal Quispe"
+date: "11/3/2019"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(rvest)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+
+## Get started
+
+We're going to write some functions.
+
+Here's z scores
+```{r}
+x = rnorm(n = 30, mean = 4, sd = 2.3)
+x_again = rnorm(n = 30, mean = 6, sd = .3) 
+y = rnorm(n = 30, mean = 24, sd = 2.3)
+(x - mean(x)) / sd(x)
+(x_again - mean(x_again)) / sd(x_again)
+```
+
+Now a function.
+
+```{r}
+z_score = function(x_arg) {
+  
+  if (!is.numeric(x_arg)) {
+    stop("x should be numeric")
+  } else if (length(x_arg) < 3) {
+    stop("x should be longer than 3")
+  } 
+  
+  (x_arg - mean(x_arg)) / sd(x_arg)
+  
+}
+```
+
+Try out the function.
+
+```{r, error = TRUE}
+z_score(x_arg = y)
+z_score(x_arg = 3)
+z_score(x_arg = "my name is jeff")
+z_score(x_arg = c(TRUE, TRUE, FALSE, TRUE))
+z_score(x_arg = iris)
+```
+
+## Multiple outputs
+
+```{r}
+mean_and_sd = function(input_x) {
+  
+  if (!is.numeric(input_x)) {
+    stop("x should be numeric")
+  } else if (length(input_x) < 3) {
+    stop("x should be longer than 3")
+  } 
+  
+  list(
+    mean_input = mean(input_x),
+    sd_input = sd(input_x),
+    z_score = (input_x - mean(input_x)) / sd(input_x)
+  )
+  
+}
+```
+
+test this function
+
+```{r}
+mean_and_sd(input_x = y)
+```
+
+
+## Multiple inputs
+
+```{r}
+sim_data = tibble(
+  x = rnorm(30, mean = 1, sd = 1),
+  y = 2 + 3 * x + rnorm(30, 0, 1)
+)
+sim_data %>% 
+  ggplot(aes(x = x, y = y)) + 
+  geom_point()
+ls_fit = lm(y ~ x, data = sim_data)
+  
+beta0_hat = coef(ls_fit)[1]
+beta1_hat = coef(ls_fit)[2]
+```
+
+```{r}
+sim_regression = function(n, beta0 = 2, beta1 = 3) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = 1, sd = 1),
+    y = beta0 + beta1 * x + rnorm(n, 0, 1)
+  )
+  
+  ls_fit = lm(y ~ x, data = sim_data)
+  
+  tibble(
+    beta0_hat = coef(ls_fit)[1],
+    beta1_hat = coef(ls_fit)[2]
+  )
+  
+}
+sim_regression(n = 3000, beta0 = 17, beta1 = -3)
+sim_regression(n = 14, beta0 = 24)
+```
+
+
+## Scrape lots of napoleon
+
+```{r}
+url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1"
+dynamite_html = read_html(url)
+review_titles = 
+  dynamite_html %>%
+  html_nodes("#cm_cr-review_list .review-title") %>%
+  html_text()
+review_stars = 
+  dynamite_html %>%
+  html_nodes("#cm_cr-review_list .review-rating") %>%
+  html_text()
+review_text = 
+  dynamite_html %>%
+  html_nodes(".review-text-content span") %>%
+  html_text()
+reviews = tibble(
+  title = review_titles,
+  stars = review_stars,
+  text = review_text
+)
+```
+
+
+Now as a function
+
+```{r}
+read_page_reviews = function(page_url) {
+  
+  dynamite_html = read_html(page_url)
+  review_titles = 
+    dynamite_html %>%
+    html_nodes("#cm_cr-review_list .review-title") %>%
+    html_text()
+  review_stars = 
+    dynamite_html %>%
+    html_nodes("#cm_cr-review_list .review-rating") %>%
+    html_text()
+  
+  review_text = 
+    dynamite_html %>%
+    html_nodes(".review-text-content span") %>%
+    html_text()
+  
+  reviews = tibble(
+    title = review_titles,
+    stars = review_stars,
+    text = review_text
+  )
+  
+  reviews
+    
+}
+```
+
+Now i can read a lot of page reviews! Although I'm back to copy-and-pasting code ...
+
+```{r}
+read_page_reviews("https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1")
+read_page_reviews("https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=2")
+read_page_reviews("https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=3")
+read_page_reviews("https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=4")
+```
+
+## Scoping
+
+Mean example ...
+
+
+```{r}
+f = function(x) {
+  z = x + y
+  z
+}
+x = 1
+y = 2
+f(x = 2)
+```
