@@ -58,10 +58,12 @@ Try out the function.
 
 ```{r, error = TRUE}
 z_score(x_arg = y)
-z_score(x_arg = 3)
-z_score(x_arg = "my name is jeff")
-z_score(x_arg = c(TRUE, TRUE, FALSE, TRUE))
-z_score(x_arg = iris)
+z_score(x_arg = 3) #you cant calcualte a sd for a single number
+z_score(x_arg = "my name is jeff") # you will get an error saying you cant calculate the mean or SD of a charecter varible
+z_score(x_arg = c(TRUE, TRUE, FALSE, TRUE)) #this works b/c r converts true to 1 and false to 0 (numeric) from where it will take the mean and SD. 
+z_score(x_arg = iris) #IRIS IS A DATA FRAME (I.E MULTIPLE ROWS AND COLUMNS, SO R REPLIES WITH ERROR, you can t find the mean and SD for all varibels within a DF, you can only do it per variable. )
+
+#r markdown will stop knitting if the function  
 ```
 
 ## Multiple outputs
@@ -79,10 +81,11 @@ mean_and_sd = function(input_x) {
     mean_input = mean(input_x),
     sd_input = sd(input_x),
     z_score = (input_x - mean(input_x)) / sd(input_x)
-  )
+  ) #instead of list(), you can use tibble()
   
 }
 ```
+
 
 test this function
 
@@ -101,15 +104,15 @@ sim_data = tibble(
 sim_data %>% 
   ggplot(aes(x = x, y = y)) + 
   geom_point()
-ls_fit = lm(y ~ x, data = sim_data)
+ls_fit = lm(y ~ x, data = sim_data) # here you are fitting a regression of y on x, using the sim date frame
   
-beta0_hat = coef(ls_fit)[1]
-beta1_hat = coef(ls_fit)[2]
+beta0_hat = coef(ls_fit)[1] #this will give you estimated intercept
+beta1_hat = coef(ls_fit)[2] #this will give you estimated slope
 ```
 
 ```{r}
 sim_regression = function(n, beta0 = 2, beta1 = 3) {
-  
+  #here you have assiged a default value of 2 for the intercept, and 3 for the slope
   sim_data = tibble(
     x = rnorm(n, mean = 1, sd = 1),
     y = beta0 + beta1 * x + rnorm(n, 0, 1)
@@ -150,6 +153,8 @@ reviews = tibble(
   stars = review_stars,
   text = review_text
 )
+
+#to get all the info (title, stars, and text) from page 2 or page 3 you change the last number on the URL to the new number page and copy and paste code over and over again
 ```
 
 
@@ -179,7 +184,7 @@ read_page_reviews = function(page_url) {
     text = review_text
   )
   
-  reviews
+  reviews #this is the output
     
 }
 ```
@@ -206,4 +211,6 @@ f = function(x) {
 x = 1
 y = 2
 f(x = 2)
+
+#the answer is 4
 ```

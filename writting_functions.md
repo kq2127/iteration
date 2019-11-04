@@ -16,22 +16,23 @@ y = rnorm(n = 30, mean = 24, sd = 2.3)
 (x - mean(x)) / sd(x)
 ```
 
-    ##  [1]  0.1300388  0.3893415 -0.1298950  0.5470806 -1.1820868 -0.5286774
-    ##  [7]  0.9517271 -0.1517901 -1.5593349  1.1159586  0.9425988 -0.7543857
-    ## [13] -0.3685304  0.9634488  0.5111004 -0.2376186  0.7211999 -0.3919225
-    ## [19] -0.4928705  2.3746912 -0.1847257  0.1022414  1.9520476  0.7218221
-    ## [25] -1.2399216 -1.9047831 -0.4694358  0.4674384 -1.4821412 -0.8126158
+    ##  [1] -0.69911486 -0.91897156  0.67260733  0.42783021  1.26911507
+    ##  [6]  0.07324386 -0.43358579 -2.08526677 -0.42674523  0.10334610
+    ## [11] -0.33898998  0.15082755  0.29869164  1.22648347  2.00699408
+    ## [16]  0.64586934  0.08690872 -1.02875818  0.31823663 -1.15452493
+    ## [21]  0.99803571 -0.09629102  0.79844850  0.22517841 -0.76820697
+    ## [26]  2.21644094 -0.11122873 -1.68646045 -0.44333384 -1.32677925
 
 ``` r
 (x_again - mean(x_again)) / sd(x_again)
 ```
 
-    ##  [1] -0.20371181 -1.05808760 -0.69725921 -0.57714082 -1.50515885
-    ##  [6] -0.05827348 -0.76960519  0.21665484  1.59897755  0.53216537
-    ## [11] -1.33128658  0.13755512 -0.80664907 -0.71787796  0.90532303
-    ## [16]  0.66426323  0.93354092  2.07208795 -0.62853678  0.03839183
-    ## [21] -0.59050821 -0.01678883 -1.42909775 -0.05784745  2.07093557
-    ## [26]  1.11942533 -0.03668837  1.57701142 -0.92793742 -0.45387678
+    ##  [1] -1.42329381 -0.26926107  0.50220173 -1.55532210  1.55045165
+    ##  [6] -0.21596679  0.68986177  0.69671053  1.71593497  0.26252200
+    ## [11]  0.38697990  0.25922192  0.40898233  0.55082856 -0.46590592
+    ## [16]  0.13660932 -1.07314829 -0.64222546  0.91105083  0.76332265
+    ## [21] -1.28295368  0.05438016 -1.66934168 -0.34555584 -2.35968378
+    ## [26]  0.19405135  0.48655953  0.69396976  1.63446304 -0.59544357
 
 Now a function.
 
@@ -55,36 +56,40 @@ Try out the function.
 z_score(x_arg = y)
 ```
 
-    ##  [1]  0.32413414  0.07109176  0.18854836 -0.48682462  0.16521772
-    ##  [6] -0.18289650  1.34099268  0.75157387  0.24812159  0.72391557
-    ## [11]  1.61829604 -1.56506474  0.62246059 -1.90713221  0.15130030
-    ## [16] -0.56215468  0.42825602  0.78160832 -1.86372946  1.31542797
-    ## [21] -0.88224356  0.21335191 -0.20252004 -0.36547368  0.06251092
-    ## [26] -2.29651753 -0.03157062  1.74775681 -0.82164915  0.41321223
+    ##  [1] -1.22753185  0.28215483 -1.29791790  0.33066216 -0.34810877
+    ##  [6] -0.04791252 -0.71254516 -0.10538110  0.08289079  1.59315139
+    ## [11] -0.96171042 -0.18508860 -0.29182978  1.47861814 -0.01699077
+    ## [16] -0.92983190  1.51835181 -2.42581242 -0.77949012  0.90157113
+    ## [21]  0.47384868  1.73151160  0.92295569 -1.36436599  0.85172373
+    ## [26]  1.18099164  0.47625166 -0.32295688 -0.32193218 -0.48527688
 
 ``` r
-z_score(x_arg = 3)
+z_score(x_arg = 3) #you cant calcualte a sd for a single number
 ```
 
     ## Error in z_score(x_arg = 3): x should be longer than 3
 
 ``` r
-z_score(x_arg = "my name is jeff")
+z_score(x_arg = "my name is jeff") # you will get an error saying you cant calculate the mean or SD of a charecter varible
 ```
 
     ## Error in z_score(x_arg = "my name is jeff"): x should be numeric
 
 ``` r
-z_score(x_arg = c(TRUE, TRUE, FALSE, TRUE))
+z_score(x_arg = c(TRUE, TRUE, FALSE, TRUE)) #this works b/c r converts true to 1 and false to 0 (numeric) from where it will take the mean and SD. 
 ```
 
     ## Error in z_score(x_arg = c(TRUE, TRUE, FALSE, TRUE)): x should be numeric
 
 ``` r
-z_score(x_arg = iris)
+z_score(x_arg = iris) #IRIS IS A DATA FRAME (I.E MULTIPLE ROWS AND COLUMNS, SO R REPLIES WITH ERROR, you can t find the mean and SD for all varibels within a DF, you can only do it per variable. )
 ```
 
     ## Error in z_score(x_arg = iris): x should be numeric
+
+``` r
+#r markdown will stop knitting if the function  
+```
 
 ## Multiple outputs
 
@@ -101,7 +106,7 @@ mean_and_sd = function(input_x) {
     mean_input = mean(input_x),
     sd_input = sd(input_x),
     z_score = (input_x - mean(input_x)) / sd(input_x)
-  )
+  ) #instead of list(), you can use tibble()
   
 }
 ```
@@ -113,18 +118,18 @@ mean_and_sd(input_x = y)
 ```
 
     ## $mean_input
-    ## [1] 24.26537
+    ## [1] 24.04081
     ## 
     ## $sd_input
-    ## [1] 2.2137
+    ## [1] 2.471225
     ## 
     ## $z_score
-    ##  [1]  0.32413414  0.07109176  0.18854836 -0.48682462  0.16521772
-    ##  [6] -0.18289650  1.34099268  0.75157387  0.24812159  0.72391557
-    ## [11]  1.61829604 -1.56506474  0.62246059 -1.90713221  0.15130030
-    ## [16] -0.56215468  0.42825602  0.78160832 -1.86372946  1.31542797
-    ## [21] -0.88224356  0.21335191 -0.20252004 -0.36547368  0.06251092
-    ## [26] -2.29651753 -0.03157062  1.74775681 -0.82164915  0.41321223
+    ##  [1] -1.22753185  0.28215483 -1.29791790  0.33066216 -0.34810877
+    ##  [6] -0.04791252 -0.71254516 -0.10538110  0.08289079  1.59315139
+    ## [11] -0.96171042 -0.18508860 -0.29182978  1.47861814 -0.01699077
+    ## [16] -0.92983190  1.51835181 -2.42581242 -0.77949012  0.90157113
+    ## [21]  0.47384868  1.73151160  0.92295569 -1.36436599  0.85172373
+    ## [26]  1.18099164  0.47625166 -0.32295688 -0.32193218 -0.48527688
 
 ## Multiple inputs
 
@@ -141,15 +146,15 @@ sim_data %>%
 <img src="writting_functions_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
 
 ``` r
-ls_fit = lm(y ~ x, data = sim_data)
+ls_fit = lm(y ~ x, data = sim_data) # here you are fitting a regression of y on x, using the sim date frame
   
-beta0_hat = coef(ls_fit)[1]
-beta1_hat = coef(ls_fit)[2]
+beta0_hat = coef(ls_fit)[1] #this will give you estimated intercept
+beta1_hat = coef(ls_fit)[2] #this will give you estimated slope
 ```
 
 ``` r
 sim_regression = function(n, beta0 = 2, beta1 = 3) {
-  
+  #here you have assiged a default value of 2 for the intercept, and 3 for the slope
   sim_data = tibble(
     x = rnorm(n, mean = 1, sd = 1),
     y = beta0 + beta1 * x + rnorm(n, 0, 1)
@@ -169,7 +174,7 @@ sim_regression(n = 3000, beta0 = 17, beta1 = -3)
     ## # A tibble: 1 x 2
     ##   beta0_hat beta1_hat
     ##       <dbl>     <dbl>
-    ## 1      17.0     -3.00
+    ## 1      17.0     -3.03
 
 ``` r
 sim_regression(n = 14, beta0 = 24)
@@ -178,7 +183,7 @@ sim_regression(n = 14, beta0 = 24)
     ## # A tibble: 1 x 2
     ##   beta0_hat beta1_hat
     ##       <dbl>     <dbl>
-    ## 1      24.0      2.94
+    ## 1      24.5      2.60
 
 ## Scrape lots of napoleon
 
@@ -202,6 +207,8 @@ reviews = tibble(
   stars = review_stars,
   text = review_text
 )
+
+#to get all the info (title, stars, and text) from page 2 or page 3 you change the last number on the URL to the new number page and copy and paste code over and over again
 ```
 
 Now as a function
@@ -230,7 +237,7 @@ read_page_reviews = function(page_url) {
     text = review_text
   )
   
-  reviews
+  reviews #this is the output
     
 }
 ```
@@ -326,3 +333,7 @@ f(x = 2)
 ```
 
     ## [1] 4
+
+``` r
+#the answer is 4
+```
