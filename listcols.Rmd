@@ -1,0 +1,282 @@
+---
+title: "Iteration and List Columns"
+author: "Kristal Quispe"
+date: "11/3/2019"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(rvest)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+set.seed(1)
+```
+
+
+## This is gonna be so great
+
+```{r}
+l = list(vec_numeric = 5:8,
+         mat         = matrix(1:8, 2, 4),
+         vec_logical = c(TRUE, FALSE),
+         summary     = summary(rnorm(1000)))
+l
+#each variable is diff type and has different number of rox/elements
+```
+
+```{r}
+l$vec_numeric
+l$summary
+l[[2]] #pulls out second thing in list, in this case the matrix
+mean(l$vec_numeric)
+```
+
+
+```{r}
+df = list( #can be organized as a tibble, but we are more concerner with working on list right now
+  a = rnorm(20, 3, 1), # length of varible, mean, SD
+  b = rnorm(20, 0, 5),
+  c = rnorm(20, 10, .2),
+  d = rnorm(20, -3, 1)
+)
+df$a
+df[[2]]
+```
+
+
+
+```{r}
+mean_and_sd = function(x) {
+  
+  if (!is.numeric(x)) {
+    stop("Argument x should be numeric")
+  } else if (length(x) == 1) {
+    stop("Cannot be computed for length 1 vectors")
+  }
+  
+  mean_x = mean(x) #function we are using
+  sd_x = sd(x)
+  
+  tibble( #output
+    mean = mean_x, 
+    sd = sd_x
+  )
+}
+```
+
+
+
+```{r}
+mean_and_sd(df[[1]]) #MEAN AND sd OF OBJECT a
+mean_and_sd(df[[2]])#object b mean and sd, and so on
+mean_and_sd(df[[3]])
+mean_and_sd(df[[4]])
+```
+
+```{r}
+#df is the input, what you need to create is something to store the output of your iteratiion
+output = vector("list", length = 4)
+```
+
+Write our first for loop!
+
+```{r}
+
+for (i in 1:4) {
+ #save output into correct output slot 
+  output[[i]] = mean_and_sd(df[[i]])
+ #for ever iteration (i) in 1-4, you wil calculate the mean and SD 
+}
+
+
+output
+
+output = map(df, mean_and_sd) #CHANGE TO MAP STATEMENT, OUTPUT EQUALS MAP (INPUT, FUNCTION YOU CARE ABOUT). This is instead of the above. This is a fucntoin you mdae
+output_median = map(df, median) #function part of R
+
+output_summary = map(df, summary)#different function in R
+
+output_median = map_dbl(df, median)#map_dbl, you dont have to map and spit out  a list, you can map_dbl and instead of a list it will spit out a vector of all of the things you are intererted in
+
+output = map_dfr(df, mean_and_sd) #you format output to ahve all four out put dfs in one table. Map_df joins the output rowwise. 
+output = map(df, ~mean_and_sd(.x)) #the . is a placeholder, the ~is explicit of what s being mapped and how it is behaving. This shoudlnt change the result shoudl just make it more explicit. 
+```
+
+
+## Napoleon!!
+
+
+```{r}
+read_page_reviews = function(url) {
+  #given a particularl url, is going to read in the html from that website, and then its going to pull out nodes, text, etc and put it into a data file
+  h = read_html(url)
+  
+  title = h %>%
+    html_nodes("#cm_cr-review_list .review-title") %>%
+    html_text()
+  
+  stars = h %>%
+    html_nodes("#cm_cr-review_list .review-rating") %>%
+    html_text() %>%
+    str_extract("\\d") %>%
+    as.numeric()
+  
+  text = h %>%
+    html_nodes(".review-data:nth-child(5)") %>%
+    html_text()
+  
+  data_frame(title, stars, text)
+}
+```
+
+
+```{r}
+url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber="
+#here you will create a url base, and then add using the str_C function a 1-5 add end of url
+vec_urls = str_c(url_base, 1:5)
+vec_urls
+
+#to extract the data, you could write the following code for how many data pages there are
+
+read_page_reviews(vec_urls[[1]])
+read_page_reviews(vec_urls[[2]])
+read_page_reviews(vec_urls[[3]])
+read_page_reviews(vec_urls[[4]])
+read_page_reviews(vec_urls[[5]])
+#Or you could do the following
+
+#this is the four loop
+output = vector("list", length = 5)
+for (i in 1:5) {
+  
+  output[[i]] = read_page_reviews(vec_urls[[i]])
+  
+}
+#this is the map statement which you can do instead of the four loop
+output = map(vec_urls, read_page_reviews)
+```
+
+
+## list columns / weather df
+
+
+```{r weather_create, cache = TRUE}
+weather = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2016-01-01",
+    date_max = "2016-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY", 
+                      USC00519397 = "Waikiki_HA",
+                      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+
+
+nest within station
+
+```{r}
+weather_nest =
+  weather %>% 
+  nest(data = date:tmin)#here you are nesting columns date through tmin (aka date, prcp, tmax, and tmin) inside of the other variables (name/ID)
+
+#SO THE NESTED colums becomes one varible and it is a data frame and variable type is a list
+
+#So what do you do with list columns/variables?
+```
+
+is the list column really a list??
+
+```{r}
+weather_nest %>% pull(name)
+weather_nest %>% pull(data) #here you pull out the three lists
+weather_nest$data[[1]] #here you pull out the first list
+
+weather_nest %>% 
+  unnest() # this unnests the lists
+```
+
+
+## Operations on list columns
+
+can I do useful things with a list column...?
+
+```{r}
+central_park_df = weather_nest$data[[1]]
+lm(tmax ~ tmin, data = central_park_df) #here you fit a linera regression model between tmax and tmin 
+lm(tmax ~ tmin, data = weather_nest$data[[1]])
+lm(tmax ~ tmin, data = weather_nest$data[[2]])
+lm(tmax ~ tmin, data = weather_nest$data[[3]])
+```
+
+try a loop ...
+
+```{r}
+output = vector("list", length = 3)
+for (i in 1:3) {
+  
+  output[[i]] = lm(tmax ~ tmin, weather_nest$data[[i]])
+  
+}
+```
+Make a function for the Liner regression model
+```{r}
+weather_lm = function(df) {
+  
+  lm(tmax ~ tmin, data = df)
+  
+}
+```
+
+
+New four loop
+```{r}
+for (i in 1:3) {
+  
+  output[[i]] = weather_lm(weather_nest$data[[i]])
+  
+}
+output = map(weather_nest$data, weather_lm)
+```
+
+```{r}
+weather_nest %>% 
+  mutate(lin_models = map(data, weather_lm)) %>% #here you are adding the lin models colum, by doing something to the other columns. You have created 3 seperate linear modesl for each of the data frames. 
+  select(-data) %>% 
+  filter(name != "CentralPark_NY")
+```
+
+
+## Revisit napoleon ... again
+
+
+```{r}
+napoleon = 
+  tibble(
+    page = 1:5,
+    urls = str_c(url_base, page)
+  ) %>% 
+  mutate(
+    reviews = map(urls, read_page_reviews)
+  ) %>% 
+  unnest(reviews) %>% 
+  select(-urls)
+```
